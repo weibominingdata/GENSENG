@@ -17,7 +17,7 @@ using namespace std;
 // ending of my header files
 
 
-void ReadDepthData::loadData(char *f)
+void ReadDepthData::loadData(char *f, bool allele)
 {
 	int lastStartPos = 0;
 	largestReadCount = 0;
@@ -26,28 +26,56 @@ void ReadDepthData::loadData(char *f)
 	vector<double> hgc;
 	string str;
 	ifstream fin(f);
-	fin >> str >> str >> str >> str >> str >> str >> str 
-		>> str >> str >> str >> str >> str >> str >> str;
-	string temp;
-	
-	while(!fin.eof())
-	{
-		ReadDepthDataItem item;
-		fin >> item.chr;
-		if (fin.eof())
-			break;
-		fin >> item.startPos >> item.endPos >> item.windowSize;
-		fin >> temp >> item.mprop >> item.gprop;
-		fin >> item.count;
-		fin >> temp >> temp >> temp;
-		fin	>> item.hFuntionGC >> item.logMap >> item.state;
-		if (item.count > largestReadCount)
-			largestReadCount = item.count;
-		readcounts.push_back(item.count);
-		logmap.push_back(item.logMap);
-		hgc.push_back(item.hFuntionGC);
-		rd.setValue(item.mprop, item.gprop, item.count);
-		data.push_back(item);
+	if (!allele){
+		fin >> str >> str >> str >> str >> str >> str >> str
+			>> str >> str >> str >> str >> str >> str >> str;
+		string temp;
+
+		while(!fin.eof())
+		{
+			ReadDepthDataItem item;
+			fin >> item.chr;
+			if (fin.eof())
+				break;
+			fin >> item.startPos >> item.endPos >> item.windowSize;
+			fin >> temp >> item.mprop >> item.gprop;
+			fin >> item.count;
+			fin >> temp >> temp >> temp;
+			fin	>> item.hFuntionGC >> item.logMap >> item.state;
+			if (item.count > largestReadCount)
+				largestReadCount = item.count;
+			readcounts.push_back(item.count);
+			logmap.push_back(item.logMap);
+			hgc.push_back(item.hFuntionGC);
+			rd.setValue(item.mprop, item.gprop, item.count);
+			data.push_back(item);
+		}
+	} else {
+		for(int i=0; i<18; ++i){
+			fin >> str;
+		}
+		string temp;
+		while(!fin.eof())
+		{
+			ReadDepthDataItem item;
+			fin >> item.chr;
+			if (fin.eof())
+				break;
+			fin >> item.startPos >> item.endPos >> item.windowSize;
+			fin >> temp >> item.mprop >> item.gprop;
+			fin >> item.count;
+			fin >> item.a1count >> item.a2count;
+			fin >> temp >> temp >> temp;
+			fin	>> item.hFuntionGC >> item.logMap >> item.state;
+			fin >> item.a1prop >> item.a2prop;
+			if (item.count > largestReadCount)
+				largestReadCount = item.count;
+			readcounts.push_back(item.count);
+			logmap.push_back(item.logMap);
+			hgc.push_back(item.hFuntionGC);
+			rd.setValue(item.mprop, item.gprop, item.count);
+			data.push_back(item);
+		}
 	}
 
 	chr = data[0].chr;
@@ -138,13 +166,14 @@ HMModel::HMModel(void)
 , HUMAN(true)
 , POSTPROCESSING(false)
 , GIVENSTATES(false)
+, ALLELESPECIFICDATA(false)
 {
 }
 
 void HMModel::loadReadDepthData(char * filename)
 {
 	setFileName(filename, filename);
-	inferData.loadData(filename);
+	inferData.loadData(filename,ALLELESPECIFICDATA);
 	chrSymbol = inferData.chr;
 	largestReadCount = inferData.largestReadCount;
 	medianReadCount = inferData.medianReadCount;
@@ -1914,8 +1943,53 @@ void HMModel::fillEmissTblItem(int site, int state)
 	{
 		pEmissTbl[site][state] = mixtureProportion/largestReadCount + (1-mixtureProportion)*e;
 	}
+
+
+	double alleleeffect=1.0;
+	if (ALLELESPECIFICDATA && inferData.data[site].a1count>0 && inferData.data[site].a2count>0){
+		switch(state){
+		case 0:
+			alleleeffect=MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.99,0.1);
+			break;
+		case 1:
+			alleleeffect=0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.01,0.1)
+			                     +0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.99,0.1);
+			break;
+		case 2:
+			alleleeffect=MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1);
+			break;
+		case 3:
+			alleleeffect=0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.33,0.1)
+						                     +0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.67,0.1);
+			break;
+		case 4:
+			alleleeffect=0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.25,0.1)
+			                               +0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1)
+			                               +0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.75,0.1);
+			break;
+		case 5:
+			alleleeffect=0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.2,0.1)
+			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.4,0.1)
+			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.6,0.1)
+			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.8,0.1);
+			break;
+		case 6:
+			alleleeffect=0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.17,0.1)
+			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.33,0.1)
+			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1)
+										   +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.67,0.1)
+			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.83,0.1);
+			break;
+		default:
+			alleleeffect=1.0;
+			break;
+		}
+	}
+	pEmissTbl[site][state] *= alleleeffect;
+
 	if (pEmissTbl[site][state] <1e-12)
 		pEmissTbl[site][state] = 1e-12;
+
 	//if (pEmissTbl[site][state] <= 0)
 	//{
 	//	cout << "wired" << endl;

@@ -17,6 +17,10 @@ struct ReadDepthDataItem
 	double mprop;
 	double gprop;
 	int state;
+	double a1count;
+	double a2count;
+	double a1prop;
+	double a2prop;
 };
 
 struct rdItem // storing info for read depth calculation
@@ -104,7 +108,7 @@ struct ReadDepthData
 	double medianlogmap;
 	double medianhgc;
 	rdmatrix rd;
-	void loadData(char * f);
+	void loadData(char * f, bool allele=false);
 	std::string chr;
 };
 
@@ -151,6 +155,7 @@ public:
 	bool HUMAN;
 	bool POSTPROCESSING;
 	bool GIVENSTATES;
+	bool ALLELESPECIFICDATA;
 
 private:
 	void computAlpha(void);

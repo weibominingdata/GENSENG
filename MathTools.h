@@ -145,6 +145,23 @@ public:
 	static double fac(int n);
 	static double dbinom(int x, int size, double p);
 
+///////////////////////////////////////////////////////////////////////////////////// beta-binomial function
+	static double betaBinomial(double n, double k, double pi, double theta);
+	static double lchoose(double n, double k);
+	static double lfastchoose(double n, double k);
+	static double lfastchoose2(double n, double k, int *s_choose);
+	static double lbeta(double a, double b);
+	static double log1p(double x);
+	static int chebyshev_init(double *dos, int nos, double eta);
+	static double chebyshev_eval(double x, const double *a, const int n);
+	static double lgammacor(double x);
+	static double gammafn(double x);
+	static void gammalims(double *xmin, double *xmax);
+	static double stirlerr(double n);
+
+
+
+
 private:
  	static const double _PI;
 	static const double _LOG10_2;

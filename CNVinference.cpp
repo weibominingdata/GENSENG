@@ -2,21 +2,19 @@
 //
 
 #include "HMModel.h"
-#include "stdlib.h"
-#include "iostream"
+#include "MathTools.h"
+#include <stdlib.h>
+#include <iostream>
 using namespace std;
 
 
 int main(int argc, char* argv[])
 {
-	//if (argc != 3)
-	//	return 1;
+//	double n=200.5, k=100;
+//	cout << "lchoose(" << n << "," << k <<")=" << MathTools::lchoose(n,k) << endl;
+
+
 	HMModel model;
-	//model.loadData("simu1_dat.txt", "simu1_inf.txt", "22");
-	//model.loadData("NA12878.null.null2.cnv.dat1.txt", "hhall.hg18.null2.pfb", "22");
-	//model.loadReadDepthData("data4hmm_chr17revise.txt");
-	
-	// current codes
 
 	cout << "inference rounds: " << atoi(argv[2]) << " mixture componenet for other states: " << atof(argv[3]) << "mixture componenet for state 2: " << atof(argv[4]) << " ";
 
@@ -52,6 +50,11 @@ int main(int argc, char* argv[])
 		if (atoi(argv[11])==1)
 			model.POSTPROCESSING = true;
 	}
+	if (argc>12){
+		if (atoi(argv[12])==1){
+			model.ALLELESPECIFICDATA=true;
+		}
+	}
 
    cout << " |using mapability: " << std::boolalpha << model.USINGMAPPABILITY
 		   << " |using autoregression: " << std::boolalpha << model.USINGAUTOREGRESSION
@@ -59,7 +62,9 @@ int main(int argc, char* argv[])
            << " |re-estimate transition probability: " << std::boolalpha << model.REESTIMATETRANSITION
            << " |re-estimate initial probability:  " << std::boolalpha << model.REESTIMATEINIT
            << " |HUMAN(true) or MOUSE(false): " << std::boolalpha << model.HUMAN
-           << " |Do POSTPROCESSING:" << std::boolalpha << model.POSTPROCESSING;
+           << " |Do POSTPROCESSING:" << std::boolalpha << model.POSTPROCESSING
+           << " |Allele specific data:  " << std::boolalpha << model.ALLELESPECIFICDATA;
+
 
 
 	cout << endl;

@@ -14,8 +14,6 @@ A file called GENSENG will be created after the compilation is completed
 
 2. Running algorithms
 =========================
-Before running it, please visit the GENSENG website http://www.cs.unc.edu/~wangwb09/GENSENG/GENSENG_download_page.html to download the sample read count data, and the suggested transition matrix for the provided sample read count data. Put the downloaded file at the same folder as the compiled GENSENG file.
-
 
 Running involves first setting several parameters outlined below. 
 
@@ -30,7 +28,7 @@ autor: whether uses the auto regressive component (1), or not (0)
 mixture: whether uses the mixture component (1), or not (0)
 tran: whether re-estimate the transition probability of HMM (1), or not (0)
 init: whether re-estimate the intial probablity of HMM (1), or not (0)
-human: the input data is human (1), or mouse (0). If the value for this field is larger than 2, it will be the given largest state (by default, the largest state will be 6).
+human: the input data is human (1), or mouse (0)
 postprocessing: whether the postprocessing step will be executed (1) , or not (0).
 
 For the provided example data, the suggested parameters will be
