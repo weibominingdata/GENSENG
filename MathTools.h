@@ -85,15 +85,6 @@ public:
           int *df_resid, int* family, double *twologlik, 
           double *scoreTestP, int *trace, double *beta);
 
-	//int glmNBlog(int *dimsNew, int *nIter, double *pY, double *z, 
-	//			 int *linkR, double *offset, double *pX, double *conv, 
-	//			 double *convGLM, int *rank, double *Xb, double *fitted, 
-	//			 double *resid, double *weights, double *phi, double *scale, 
-	//			 int *df_resid, int* family, double *twoLL_trec, 
-	//			 double *scoreTestP, int *trace, double *beta,
-	//			 double *fitted2, double *offsetN);
-
-
 
 	////////////// version without prior /////////////////////////
 		static int glmFit(bool useLess, int* familyR, int* linkR, int* dims, int* nIter,

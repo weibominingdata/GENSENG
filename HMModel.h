@@ -126,8 +126,7 @@ public:
 
 	// read depth variable
 	ReadDepthData inferData;
-//	void calculateMuAndPhiWithAutoRegression();
-//	void calculateMuAndPhi(bool init=false); // fill in the mu and phi matrix
+
 
 	void calculateMuAndPhiAllStatesCombined(bool init=false);
 	void calculateMuAndPhiWithAutoRegressionAllStatesCombined();
@@ -143,7 +142,6 @@ public:
 
 
 public:
-//	void loadData(char * sn, char * in, std::string chr);
 	void writeResult(void);
 	void inferAndEstimation(int rounds);
 
@@ -198,7 +196,6 @@ private:
 	int nITRATION;
 
 
-//	void fillEmissTblItem(int site,int state, int pos);
 	void fillEmissTblItem(int site,int state);
 	void fillEmissionTbl(void);
 	void fillTranContinous(void); 
@@ -229,8 +226,6 @@ public:
 private:
 	std::string chrSymbol;
 	void setFileName(char * sn, char * in);
-//	double calLRR(double r, int z, double *, double *, double *);
-//	double calBAF(double b, int z, double pb, double *, double **, double **);
 private:
 	double *pircn;
 	double *murcn;
