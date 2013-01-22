@@ -178,21 +178,6 @@ void HMModel::loadReadDepthData(char * filename)
 	largestReadCount = inferData.largestReadCount;
 	medianReadCount = inferData.medianReadCount;
 	setReadDepthVariable();
-	// load median count
-	//ifstream fin("TrioMedian_chr11");
-	//double temp;
-	//while(!fin.eof())
-	//{
-	//	fin >> temp;
-	//	median.push_back(temp);
-	//}
-	//fin.close();
-	
-	//calculateMuAndPhi(true);
-	//calculateMuAndPhiWithAutoRegression(); // auto regression part
-
-	//calculateMuAndPhiAllStatesCombined(true);
-	//calculateMuAndPhiWithAutoRegressionAllStatesCombined();
 
 	startFromCoefficient();
 
@@ -204,28 +189,17 @@ void HMModel::startFromCoefficient()
 {
 	cout << "start with coefficient" << endl;
 	cout << nSTATES << " " << normalStates << endl;
-	// calculate the median of the win counts
 
-	// this version accords with the all states combined model
-	//double coverageDifference = medianReadCount/220;
-	//double intercept = 4.7;
-	//double newintercept = intercept+log(coverageDifference);
+
 	double delta = 0.5;
 	double coefficientforgc = 0.5;
 
 	cout << delta << " " << coefficientforgc << " " << endl;
 
-	//cout << coverageDifference << " " << newintercept << endl;
     double newintercept = log(medianReadCount)-log(normalStates)-medianLogmap-coefficientforgc*medianHgc;
     cout << newintercept << endl;
 
-/*	double coverageDifference = medianReadCount/220;
-	double intercept = 4.7;
-	double newintercept = intercept+log(coverageDifference);
-	double delta = 0.5;
-	double coefficientforgc = 1.0;
-	cout << coverageDifference << " " << newintercept << endl;
-*/
+
 	for(int i = 0; i < nSTATES; ++i)
 	{
 		phi[i] = 1.0;
@@ -284,21 +258,7 @@ void HMModel::calculateMuAndPhiAllStatesCombined(bool init)
 			x[index++] = inferData.data[i].hFuntionGC;
 		}
 	}
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		x[index++] = inferData.data[i].logMap;
-	//	}
-	//}
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	x[index++] = log(delta);
-	//	for(int j = 1; j < nSTATES; ++j)
-	//	{
-	//		x[index++] = log(j*1.0);
-	//	}
-	//}
+
 
 
 	// load offset
@@ -396,22 +356,7 @@ void HMModel::calculateMuAndPhiAllStatesCombined(bool init)
 
     if (beta>=0){
 	    cout << "beta for gc content is " << beta << " ";
-	//cout << "beta for log map is " << beta << " ";
-	//double sumIntercept = 0;
-	//for (int i = 0; i < index; ++i)
-	//{
-	//	//cout << log(fitted[i])-offset[i]-beta*x[i] << endl;
-	//	sumIntercept += log(fitted[i])-offset[i]-beta*x[i];
-	//}
-	//double meanIntercept = sumIntercept/index;
-	//cout << "mean value of intercept " << meanIntercept << " ";
-	//sumIntercept = 0;
-	//for (int i = 0; i < index; ++i)
-	//{
-	//	double temp = log(fitted[i])-offset[i]-beta*x[i];
-	//	sumIntercept += (temp-meanIntercept)*(temp-meanIntercept);
-	//}
-	//cout << "variance value of intercept " << sumIntercept/index << " ";
+
 
 
 
@@ -429,36 +374,7 @@ void HMModel::calculateMuAndPhiAllStatesCombined(bool init)
         cout << "beta becomes negative value, error will occur, just don't store the fitting value" << endl;
     }
 
-	// calculate the mean square root of errors for fitting
-	//double error = 0;
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	double e = 0;
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		e += (mu[i][j]-inferData.data[i].count)*(mu[i][j]-inferData.data[i].count);
-	//	}
-	//	e /= nSTATES;
-	//	error += e;
-	//}
-	//error /= nLength;
-	//error = sqrt(error);
-	//cout << "MSE of fitted data is " << error << " ";
 
-	// calculate the weighted mean square root of errors for fitting
-	//error = 0;
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	double e = 0;
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		e += exp(pGamma[i][j])*(mu[i][j]-inferData.data[i].count)*(mu[i][j]-inferData.data[i].count);
-	//	}
-	//	error += e;
-	//}
-	//error /= nLength;
-	//error = sqrt(error);
-	//cout << "weigthed MSE of fitted data is " << error << endl;
 
 
 	// fix phi
@@ -472,21 +388,7 @@ void HMModel::calculateMuAndPhiAllStatesCombined(bool init)
 	delete []Xb; Xb=NULL;
 	delete []offset;
 
-	// run phi_ml several times to get phi
-	//y = new double[nLength];
-	//fitted = new double[nLength];
-	//prior = new double[nLength];
-	//for(int j = 0; j < nSTATES; ++j)
-	//{
-	//	for(int i = 0; i < nLength; ++i)
-	//	{
-	//		y[i] = inferData.data[i].count;
-	//		fitted[i] = mu[i][j];
-	//		prior[i] = exp(pGamma[i][j]);
-	//	}
-	//	int cvPhi = MathTools::phi_ml(y, fitted, nLength, prior, maxIt,
-	//		convR, &phi[j], 0, 0);
-	//}
+
 		int cvPhi = MathTools::phi_ml(y, fitted, nLength*nSTATES, prior, maxIt,
 			convR, &phi[0], 0, 0);
 		if (phi[0]>20)
@@ -559,21 +461,7 @@ void HMModel::calculateMuAndPhiWithAutoRegressionAllStatesCombined()
 			x[index++] = inferData.data[i].hFuntionGC;
 		}
 	}
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		x[index++] = inferData.data[i].logMap;
-	//	}
-	//}
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	x[index++] = log(delta);
-	//	for(int j = 1; j < nSTATES; ++j)
-	//	{
-	//		x[index++] = log(j*1.0);
-	//	}
-	//}
+
 
 
 	// load offset
@@ -694,36 +582,7 @@ void HMModel::calculateMuAndPhiWithAutoRegressionAllStatesCombined()
     else{
         cout << "beta becomes negative value, error will occur, just don't store the fitting value" << endl;
     }
-	// calculate the mean square root of errors for fitting
-	//double error = 0;
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	double e = 0;
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		e += (mu[i][j]-inferData.data[i].count)*(mu[i][j]-inferData.data[i].count);
-	//	}
-	//	e /= nSTATES;
-	//	error += e;
-	//}
-	//error /= nLength;
-	//error = sqrt(error);
-	//cout << "MSE of fitted data is " << error << " ";
 
-	// calculate the weighted mean square root of errors for fitting
-	//error = 0;
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	double e = 0;
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		e += exp(pGamma[i][j])*(mu[i][j]-inferData.data[i].count)*(mu[i][j]-inferData.data[i].count);
-	//	}
-	//	error += e;
-	//}
-	//error /= nLength;
-	//error = sqrt(error);
-	//cout << "weigthed MSE of fitted data is " << error << endl;
 
 
 	//delete []y; y=NULL;
@@ -735,21 +594,7 @@ void HMModel::calculateMuAndPhiWithAutoRegressionAllStatesCombined()
 	delete []Xb; Xb=NULL;
 	delete []offset; offset = NULL;
 
-	// run phi_ml several times to get phi
-	//y = new double[nLength];
-	//fitted = new double[nLength];
-	//prior = new double[nLength];
-	//for(int j = 0; j < nSTATES; ++j)
-	//{
-	//	for(int i = 0; i < nLength; ++i)
-	//	{
-	//		y[i] = inferData.data[i].count;
-	//		fitted[i] = mu[i][j];
-	//		prior[i] = exp(pGamma[i][j]);
-	//	}
-	//	int cvPhi = MathTools::phi_ml(y, fitted, nLength, prior, maxIt,
-	//		convR, &phi[j], 0, 0);
-	//}
+
 		int cvPhi = MathTools::phi_ml(y, fitted, nLength*nSTATES, prior, maxIt,
 			convR, &phi[0], 0, 0);
 		if (phi[0]>20)
@@ -785,112 +630,6 @@ void HMModel::setTranInitValue(double **pTran)
     }
     fin.close();
 
-
-	// rules
-	// self-transition > transition to other states
-	// self-transition normal > self-transition other states
-	// transition to normal > transition to other
-	// transition to similar state > transition to other states
-	// added up to 1
-	// detail design:
-	// state normal transit to del = state normal transit to dup
-	// state del transit to normal = 2 state transit to del = 4 state transit to dup
-	// state dup transit to normal = 2 state transit to dup = 4 state transit to del
-/*	int nDel = normalStates-0+1-1;
-	cout << "#del states = " << nDel << endl;
-	int nDup = nSTATES-normalStates-1;
-	cout << "#dup states = " << nDup << endl;
-	double toNormal=4, toSame=2, toDiff=1;
-	double total= toNormal+toSame+toDiff;
-	for(int i = 0; i < nSTATES; ++i)
-	{
-		for(int j = 0; j < nSTATES; ++j)
-		{
-			if (i==j)
-			{
-				if (i==normalStates)
-					pTran[i][j] = normalSelfTran;
-				else
-					pTran[i][j] = otherSelfTran;
-			}
-			else
-			{
-				if (i==normalStates)
-				{
-					double p = 1-normalSelfTran;
-					if (j<normalStates)
-					{
-						p = p/2;
-						pTran[i][j] = p/nDel;
-					}
-					else
-					{
-						p = p/2;
-						pTran[i][j] = p/nDup;
-					}
-				}
-				else if (i<normalStates)
-				{
-					double p = 1-otherSelfTran;
-					if (j < normalStates)
-					{
-						p = p*(toSame)/total;
-						pTran[i][j]=p/(nDel-1);
-					}
-					else if (j == normalStates)
-					{
-						p = p*(toNormal)/total;
-						pTran[i][j] = p;
-					}
-					else
-					{
-						p = p*(toDiff)/total;
-						pTran[i][j] = p/(nDup);
-					}
-				}
-				else
-				{
-					double p = 1-otherSelfTran;
-					if (j < normalStates)
-					{
-						p = p*(toDiff)/total;
-						pTran[i][j]=p/(nDel);
-					}
-					else if (j == normalStates)
-					{
-						p = p*(toNormal)/total;
-						pTran[i][j] = p;
-					}
-					else
-					{
-						p = p*(toSame)/total;
-						pTran[i][j] = p/(nDup-1);
-					}
-				}
-
-			}
-						if (i==j)
-			{
-				if (i==normalStates)
-					pTran[i][j] = normalSelfTran;
-				else
-					pTran[i][j] = otherSelfTran;
-			}
-			else
-			{
-				if (j==normalStates)
-					pTran[i][j] = (1-otherSelfTran)*3/(nSTATES+1);
-				else
-				{
-					if (i==normalStates)
-						pTran[i][j] = (1-normalSelfTran)/(nSTATES-1);
-					else
-						pTran[i][j] = (1-otherSelfTran)/(nSTATES+1);
-				}
-			}
-	}
-	}
-*/
 }
 
 
@@ -951,47 +690,10 @@ void HMModel::setReadDepthVariable()
 			pTran[i][j] = new double[nSTATES];
 		}
 	}
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		if (i==j)
-	//			pTranTbl[i][j] = 0.9;
-	//		else
-	//			pTranTbl[i][j] = 0.1/(nSTATES-1);
-	//	}
-	//}
-	//double normalSelfTran=0.99995;
-	//double normalSelfTran = 0.995;
-	//double otherSelfTran=0.95;
+
 	setTranInitValue(pTranTbl);
 	cout << normalSelfTran << " " << otherSelfTran << endl;
-/*	for(int i = 0; i < nSTATES; ++i)
-	{
-		for(int j = 0; j < nSTATES; ++j)
-		{
-			if (i==j)
-			{
-				if (i==normalStates)
-					pTranTbl[i][j] = normalSelfTran;
-				else
-					pTranTbl[i][j] = otherSelfTran;
-			}
-			else
-			{
-				if (j==normalStates)
-					pTranTbl[i][j] = (1-otherSelfTran)*3/(nSTATES+1);
-				else
-				{
-					if (i==normalStates)
-						pTranTbl[i][j] = (1-normalSelfTran)/(nSTATES-1);
-					else
-						pTranTbl[i][j] = (1-otherSelfTran)/(nSTATES+1);
-				}
-			}
-		}
-	}
-*/
+
 
 
 
@@ -1048,176 +750,13 @@ void HMModel::setReadDepthVariable()
 		}
 	}
 
-
-	//pKexi = new double **[nLength];
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	pKexi[i] = new double*[nSTATES];
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		pKexi[i][j] = new double[nSTATES];
-	//	}
-	//}
-
-	//pGa = new double *[nLength];
-	//for(int i = 0; i < nLength; ++i)
-	//	pGa[i] = new double[nSTATES];
-
-
-	// lots of new variables
-	//pircn = new double [nSTATES];
-	//murcn = new double [nSTATES];
-	//sdrcn = new double [nSTATES];
-	//pir = new double [nSTATES];
-	//mur = new double [nSTATES];
-	//sdr = new double [nSTATES];
-	//pib = new double [nSTATES];
-	//mub = new double *[nSTATES];
-	//for(int i = 0; i < nSTATES; ++i)
-	//	mub[i] = new double [nSTATES];
-	//sdb = new double*[nSTATES];
-	//for(int i = 0; i < nSTATES; ++i)
-	//	sdb[i] = new double [nSTATES];
-
-	//pir[0] = 0.01; pir[1] = 0.01; pir[2] = 0.1; pir[3] = 0.01; pir[4] = 0.01; pir[5] = 0.01;
-	//mur[0] = 0.0; mur[1] = 0.0; mur[2] = -3.5; mur[3] = -0.67; mur[4] = 0.4; mur[5] = 0.68;
-	//sdr[0] = 0.15; sdr[1] = 0.15; sdr[2] = 1.3; sdr[3] = 0.28; sdr[4] = 0.2; sdr[5] = 0.19;
-	//pircn[0] = 0.01; pircn[1] = 0.01; pircn[2] = 0.1; pircn[3] = 0.01; pircn[4] = 0.01; pircn[5] = 0.01;
-	//murcn[0] = 0.0; murcn[1] = 0.0; murcn[2] = -2.1; murcn[3] = -0.58; murcn[4] = 0.37; murcn[5] = 0.65;
-	//sdrcn[0] = 0.18; sdrcn[1] = 0.18; sdrcn[2] = 2.1; sdrcn[3] = 0.35; sdrcn[4] = 0.24; sdrcn[5] = 0.3;
-	//pib[0] = 0.01; pib[1] = 0.01; pib[2] = 0.5; pib[3] = 0.01; pib[4] = 0.01; pib[5] = 0.01;
-
-	//mub[0][0] = 0.0;mub[0][1] = 0.5;mub[0][2] = 1.0;mub[0][3] = -1.0;mub[0][4] = -1.0;mub[0][5] = -1.0;
-	//mub[1][0] = 0.0;mub[1][1] = -1.0;mub[1][2] = -1.0;mub[1][3] = 1.0;mub[1][4] = -1.0;mub[1][5] = -1.0;
-	//mub[2][0] = 0.5;mub[2][1] = -1.0;mub[2][2] = -1.0;mub[2][3] = -1.0;mub[2][4] = -1.0;mub[2][5] = -1.0;
-	//mub[3][0] = 0.0;mub[3][1] = -1.0;mub[3][2] = -1.0;mub[3][3] = 1.0;mub[3][4] = -1.0;mub[3][5] = -1.0;
-	//mub[4][0] = 0.0;mub[4][1] = 0.333;mub[4][2] = 0.667;mub[4][3] = 1.0;mub[4][4] = -1.0;mub[4][5] = -1.0;
-	//mub[5][0] = 0.0;mub[5][1] = 0.25;mub[5][2] = 0.5;mub[5][3] = 0.75;mub[5][4] = 1.0;mub[5][5] = -1.0;
-
-	//sdb[0][0] = 0.016; sdb[0][1] = 0.035; sdb[0][2] = 0.016; sdb[0][3] = -1.0; sdb[0][4] = -1.0; sdb[0][5] = -1.0;
-	//sdb[1][0] = 0.016; sdb[1][1] = -1.0; sdb[1][2] = -1.0; sdb[1][3] = 0.16; sdb[1][4] = -1.0; sdb[1][5] = -1.0;
-	//sdb[2][0] = 0.15; sdb[2][1] = -1.0; sdb[2][2] = -1.0; sdb[2][3] = -1.0; sdb[2][4] = -1.0; sdb[2][5] = -1.0;
-	//sdb[3][0] = 0.016; sdb[3][1] = -1.0; sdb[3][2] = -1.0; sdb[3][3] = 0.16; sdb[3][4] = -1.0; sdb[3][5] = -1.0;
-	//sdb[4][0] = 0.016; sdb[4][1] = 0.042; sdb[4][2] = 0.042; sdb[4][3] = 0.016; sdb[4][4] = -1.0; sdb[4][5] = -1.0;
-	//sdb[5][0] = 0.016; sdb[5][1] = 0.042; sdb[5][2] = 0.035; sdb[5][3] = 0.42; sdb[5][4] = 0.016; sdb[5][5] = -1.0;
-
 }
 
 
 
 HMModel::~HMModel(void)
 {
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	delete []pTranTbl[i];
-	//	pTranTbl[i] = NULL;
-	//}
-	//delete []pTranTbl;
-	//pTranTbl = NULL;
 
-	//delete []inferenceResults;
-	//inferenceResults = NULL;
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		delete []pTran[i][j];
-	//		pTran[i][j] = NULL;
-	//	}
-	//	delete []pTran[i];
-	//	pTran[i] = NULL;
-	//}
-	//delete []pTran;
-	//pTran = NULL;
-	//
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	delete []pEmissTbl[i];
-	//	pEmissTbl[i] = NULL;
-	//}
-	//delete []pEmissTbl;
-	//pEmissTbl = NULL;
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	delete []pAlpha[i];
-	//	pAlpha[i] = NULL;
-	//}
-	//delete []pAlpha;
-	//pAlpha = NULL;
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	delete []pBeta[i];
-	//	pBeta[i] = NULL;
-	//}
-	//delete []pBeta;
-	//pBeta = NULL;
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	delete []pGa[i];
-	//	pGa[i] = NULL;
-	//}
-	//delete []pGa;
-	//pGa = NULL;
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		delete []pKexi[i][j];
-	//		pKexi[i][j] = NULL;
-	//	}
-	//	delete []pKexi[i];
-	//	pKexi[i] = NULL;
-	//}
-	//delete []pKexi;
-	//pKexi = NULL;
-
-
-	//for(int i = 0; i < nLength; ++i)
-	//{
-	//	delete []pGamma[i];
-	//	pGamma[i] = NULL;
-	//}
-	//delete []pGamma;
-	//pGamma = NULL;
-
-	//delete []pPi;
-	//pPi = NULL;
-
-	//// lots of deconstruction 
-	//delete	[]pircn;
-	//pircn = NULL;
-	//delete	[]murcn;
-	//murcn = NULL;
-	//delete	[]sdrcn;
-	//sdrcn = NULL;
-	//delete	[]pir;
-	//pir = NULL;
-	//delete	[]mur;
-	//mur = NULL;
-	//delete	[]sdr;
-	//sdr = NULL;
-	//delete	[]pib;
-	//pib = NULL;
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	delete	[]mub[i];
-	//	mub[i] = NULL;
-	//}
-	//delete	[]mub;
-	//mub = NULL;
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	delete	[]sdb[i];
-	//	sdb[i] = NULL;
-	//}
-	//delete	[]sdb;
-	//sdb = NULL;
 }
 
 HMModel::HMModel(const HMModel & m)
@@ -1426,10 +965,7 @@ int HMModel::mostFrequentState(int l, int r)
 void HMModel::writeResult(void)
 {
 	
-	//computGamma();  // now we have posterior probability
-	//int * maxPostPIndx = new int[nLength];
-
-	//
+    //
 	if (POSTPROCESSING)
 	{
 		cout << "post processing" << endl;
@@ -1441,51 +977,6 @@ void HMModel::writeResult(void)
 	for(int i = 0; i < nLength; ++i)
 	{
 		int index = inferenceResults[i];
-		//max = -10;
-		//for(int j = 0; j < nSTATES; ++j)
-		//{
-			//if (pGamma[i][j] > pGamma[i][index])
-			//if (pAlpha[i][j]*pBeta[i][j] > max)
-			//{
-			//	max = pAlpha[i][j]*pBeta[i][j];
-			//	index = j;
-			//}
-			//maxPostPIndx[i] = index;
-			//if (index == 0 || index ==1)
-			//{
-			//	cn[i] = 2;
-			//}
-			//else if (index == 2)
-			//{
-			//	cn[i] = 0;
-			//}
-			//else if (index == 3)
-			//{
-			//	cn[i] = 1;
-			//}
-			//else if (index == 4)
-			//{
-			//	cn[i] = 3;
-			//}
-			//else if (index == 5)
-			//{
-			//	cn[i] = 4;
-			//}
-		//}
-		// assign cn by the closet read count, not the HMM inferred states
-		// purpose: how well is the fitting
-/*		index=-1;
-		double diff = 100000.0;
-
-		for(int j = 0; j < nSTATES; ++j)
-		{
-			if (fabs(mu[i][j]-inferData.data[i].count) < diff)
-			{
-				diff = fabs(mu[i][j]-inferData.data[i].count);
-				index = j;
-		    }
-		}
-*/
 		cn[i] = index;
 	}
 
@@ -1509,93 +1000,6 @@ void HMModel::writeResult(void)
 	int end = 0;
 	bool cnv = false;
 	int cnvtype = -1;
-
-	// extra filtering step
-	int minNHighConfidence = 3;
-	double minP=0.9;
-	cout << "No extra filtering step" << endl;
-	//cout << "In extra filtering step, each window of a cnv, should has at least three consecutive windows, all with posterior probability higher than " << minP << endl;
-	//cout << "In extra filtering step, each window of a cnv, except boundaries, should be larger than " << minP << endl;
-	/*	for(int i = 0; i < nLength; ++i)
-	{
-		if (cn[i] != normalStates)
-		{
-			if (!cnv)
-			{
-				cnv = true;
-				start = i;
-				cnvtype = cn[i];
-			}
-			else
-			{
-				if (cnvtype != cn[i])
-				{
-					// find the smallest posterior probability except the boundary points
-					end = i-1;
-					int consecut = 0;
-					int largestconsect = 0;
-					for(int j = start; j <= end; ++j)
-					{
-						if (exp(pGamma[j][inferenceResults[j]]) < minP)
-						{
-							if (consecut > largestconsect)
-							{
-								largestconsect = consecut;
-							}
-							consecut = 0;
-						}
-						else
-						{
-							consecut++;
-						}
-					}
-					if (largestconsect < minNHighConfidence)
-					{
-						for(int j = start; j <= end; ++j)
-						{
-							cn[j] = normalStates;
-						}
-					}
-					// a start of a new CNV
-					start = i;
-					cnvtype = cn[i];
-				}
-			}
-		}
-		else
-		{
-			if (cnv)
-			{
-				end = i-1;
-				int consecut = 0;
-				int largestconsect = 0;
-				for(int j = start; j <= end; ++j)
-				{
-					if (exp(pGamma[j][inferenceResults[j]]) < minP)
-					{
-						if (consecut > largestconsect)
-						{
-							largestconsect = consecut;
-						}
-						consecut = 0;
-					}
-					else
-					{
-						consecut++;
-					}
-				}
-				if (largestconsect < minNHighConfidence)
-				{
-					for(int j = start; j <= end; ++j)
-					{
-						cn[j] = normalStates;
-					}
-				}
-			}
-			cnv = false;
-		}
-	}
-*/
 
 	//
 	start = 0;
@@ -1621,10 +1025,6 @@ void HMModel::writeResult(void)
 					double score = 0;
 					for(int j = start; j <= end; ++j)
 						score += exp(pGamma[j][inferenceResults[j]]);
-					//out1 << chrSymbol << "\t" << cPos[start] << "\t" << cPos[end] << "\t"
-					//	<< inferenceResults[start]+1 << "\t" << cn[start] << "\t" << "test\t"
-					//	<< cName[start] << "\t" << cName[end] << "\t" << score << "\t"
-					//	<< end-start+1 << endl;
 					double mscore = score/(end-start+1);
 					double amprop,agprop,rd,expect;
 					getSegInfo(start,end,amprop,agprop,rd,expect);
@@ -1646,10 +1046,6 @@ void HMModel::writeResult(void)
 				double score = 0;
 				for(int j = start; j <= end; ++j)
 					score += exp(pGamma[j][inferenceResults[j]]);
-				//out1 << chrSymbol << "\t" << cPos[start] << "\t" << cPos[end] << "\t"
-				//	<< inferenceResults[start]+1 << "\t" << cn[start] << "\t" << "test\t"
-				//	<< cName[start] << "\t" << cName[end] << "\t" << score << "\t"
-				//	<< end-start+1 << endl;
 				double mscore = score/(end-start+1);
 				double amprop,agprop,rd,expect;
 				getSegInfo(start,end,amprop,agprop,rd,expect);
@@ -1657,14 +1053,9 @@ void HMModel::writeResult(void)
 					<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
 					<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd<< "\t" << expect << endl;
 
-//				out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
-//					<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
-//					<< score << "\t" << end-start+1 << endl;
 			}
 			cnv = false;
 		}
-		//out << cName[i] << "\t" << inferenceResults[i] << "\t" << exp(pGamma[i][inferenceResults[i]]) <<"\t"
-		//	<< cn[i] << endl;
 		out << chrSymbol << "\t" << inferData.data[i].startPos << "\t" << inferData.data[i].endPos <<"\t" << inferData.data[i].mprop <<"\t" << inferData.data[i].gprop
 				<<"\t" << inferData.data[i].count <<"\t" <<  inferenceResults[i] << "\t" << exp(pGamma[i][inferenceResults[i]]) <<"\t"
 			<< cn[i] << endl;
@@ -1677,10 +1068,6 @@ void HMModel::writeResult(void)
 		double score = 0;
 		for(int j = start; j <= end; ++j)
 			score += exp(pGamma[j][inferenceResults[j]]);
-		//out1 << chrSymbol << "\t" << cPos[start] << "\t" << cPos[end] << "\t"
-		//	<< inferenceResults[start]+1 << "\t" << cn[start] << "\t" << "test\t"
-		//	<< cName[start] << "\t" << cName[end] << "\t" << score << "\t"
-		//	<< end-start+1 << endl;
 		double mscore = score/(end-start+1);
 		double amprop,agprop,rd,expect;
 		getSegInfo(start,end,amprop,agprop,rd,expect);
@@ -1688,16 +1075,11 @@ void HMModel::writeResult(void)
 			<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
 			<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
 
-//		out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
-//			<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
-//			<< score << "\t" << end-start+1 << endl;
 	}
 
 
 	out.close();
 	out1.close();
-	//delete []maxPostPIndx;
-	//maxPostPIndx = NULL;
 	delete []cn;
 	cn = NULL;
 
@@ -1808,8 +1190,6 @@ void HMModel::reEstimation(bool transitionReestimate, bool initReestimation)
 		delete []c;
 		c = NULL;
 	}
-	//calculateMuAndPhi();
-	//calculateMuAndPhiWithAutoRegression(); // calculate with auto regression
 
 	calculateMuAndPhiAllStatesCombined();
 	if (USINGAUTOREGRESSION)
@@ -1817,78 +1197,6 @@ void HMModel::reEstimation(bool transitionReestimate, bool initReestimation)
 
 
 	fillEmissionTbl();
-	//for(int step = 0; step < nLength-1; ++step)
-	//{
-	//	double sum = 0;
-	//	for(int i = 0; i < nSTATES; ++i)
-	//	{
-	//		for(int j = 0; j < nSTATES; ++j)
-	//		{
-	//			sum += pAlpha[step][i]*pTran[step+1][i][j]*pEmissTbl[step+1][j]*pBeta[step+1][j];
-	//		}
-	//	}
-	//	for(int i = 0; i < nSTATES; ++i)
-	//	{
-	//		for(int j = 0; j < nSTATES; ++j)
-	//		{
-	//			pKexi[step][i][j] = pAlpha[step][i]*pTran[step+1][i][j]*pEmissTbl[step+1][j]*pBeta[step+1][j]/sum;
-	//		}
-	//	}
-	//}
-	//for(int step = 0; step < nLength-1; ++step)
-	//{
-	//	for(int i = 0; i < nSTATES; ++i)
-	//	{
-	//		pGa[step][i] = 0;
-	//		for(int j = 0; j < nSTATES; ++j)
-	//		{
-	//			pGa[step][i] += pKexi[step][i][j];
-	//		}
-	//	}
-	//}
-	//double sum = 0;
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	pGa[nLength-1][i] = pAlpha[nLength-1][i]*pBeta[nLength-1][i];
-	//	sum += pGa[nLength-1][i];
-	//}
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	pGa[nLength-1][i] /= sum;
-	//}
-	//// re-estimate init probability
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	pPi[i] = pGa[0][i];
-	//}
-	//// re-estimate transition probability
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	double sumi = 0;
-	//	for(int step = 0; step < nLength-1; ++step)
-	//	{
-	//		sumi += pGa[step][i];
-	//	}
-	//	double sumii = 0;
-	//	double *sumij = new double[nSTATES];
-	//	for(int j = 0; j < nSTATES; ++j)
-	//	{
-	//		sumij[j] = 0;
-	//		for(int step = 0; step < nLength-1; ++step)
-	//		{
-	//			sumij[j] += pKexi[step][i][j];
-	//		}
-	//		if (j == i)
-	//		{
-	//			sumii = sumij[j];
-	//			sumij[j] = 0;
-	//		}		
-	//	}
-	//	for(int j = 0; j < nSTATES; ++j)
-	//		pTranTbl[i][j] = sumij[j] / (sumi-sumii);
-	//	delete []sumij;
-	//}
-	//fillTran();
 
 }
 
@@ -1896,15 +1204,7 @@ void HMModel::reEstimation(bool transitionReestimate, bool initReestimation)
 
 void HMModel::fillEmissionTbl(void)
 {
-	//for(int i = 0; i < nSTATES; ++i)
-	//{
-	//	int j = 0;
-	//	map<int, double>::iterator it = cLRR.begin();
-	//	for(; it != cLRR.end(); ++it, ++j)
-	//	{
-	//		fillEmissTblItem(j, i, (*it).first);
-	//	}
-	//}
+
 	for(int i = 0; i < nLength; ++i)
 	{
 		for(int j = 0; j < nSTATES; ++j)
@@ -1916,20 +1216,7 @@ void HMModel::fillEmissionTbl(void)
 
 void HMModel::fillEmissTblItem(int site, int state)
 {
-	//double th = theta[state];
-	//double u = 0;
-	//if (state ==0)
-	//{
-	//	u = beta0;
-	//}
-	//else
-	//{
-	//	u = exp(beta0+beta1*log(state*1.0)
-	//		+beta2*inferData.data[site].logMap
-	//	+beta3*inferData.data[site].hFuntionGC);
-	//}
-	//pEmissTbl[site][state] = exp(
-	//	MathTools::loglik_NB(1, th, &u, &inferData.data[site].count));
+
 	double m = mu[site][state];
 	double y = inferData.data[site].count;
 	double w = 1; // weight is not useful when calculating the emission probability
@@ -1946,39 +1233,42 @@ void HMModel::fillEmissTblItem(int site, int state)
 
 
 	double alleleeffect=1.0;
-	if (ALLELESPECIFICDATA && inferData.data[site].a1count>0 && inferData.data[site].a2count>0){
+	double alleleCount=inferData.data[site].a1count + inferData.data[site].a2count;
+	if (ALLELESPECIFICDATA && alleleCount>0){
+
 		switch(state){
 		case 0:
-			alleleeffect=MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.99,0.1);
+			//alleleeffect=MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.99,0.1);
+			alleleeffect=1/std::max(1.0,alleleCount);
 			break;
 		case 1:
-			alleleeffect=0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.01,0.1)
-			                     +0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.99,0.1);
+			alleleeffect=0.5*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.01,0.1)
+			                     +0.5*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.99,0.1);
 			break;
 		case 2:
-			alleleeffect=MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1);
+			alleleeffect=MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.5,0.1);
 			break;
 		case 3:
-			alleleeffect=0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.33,0.1)
-						                     +0.5*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.67,0.1);
+			alleleeffect=0.5*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.33,0.1)
+						                     +0.5*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.67,0.1);
 			break;
 		case 4:
-			alleleeffect=0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.25,0.1)
-			                               +0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1)
-			                               +0.33*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.75,0.1);
+			alleleeffect=0.33*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.25,0.1)
+			                               +0.33*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.5,0.1)
+			                               +0.33*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.75,0.1);
 			break;
 		case 5:
-			alleleeffect=0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.2,0.1)
-			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.4,0.1)
-			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.6,0.1)
-			                               +0.25*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.8,0.1);
+			alleleeffect=0.25*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.2,0.1)
+			                               +0.25*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.4,0.1)
+			                               +0.25*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.6,0.1)
+			                               +0.25*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.8,0.1);
 			break;
 		case 6:
-			alleleeffect=0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.17,0.1)
-			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.33,0.1)
-			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.5,0.1)
-										   +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.67,0.1)
-			                               +0.17*MathTools::betaBinomial(inferData.data[site].count,inferData.data[site].a1count,0.83,0.1);
+			alleleeffect=0.17*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.17,0.1)
+			                               +0.17*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.33,0.1)
+			                               +0.17*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.5,0.1)
+										   +0.17*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.67,0.1)
+			                               +0.17*MathTools::betaBinomial(alleleCount,inferData.data[site].a1count,0.83,0.1);
 			break;
 		default:
 			alleleeffect=1.0;
@@ -1990,13 +1280,6 @@ void HMModel::fillEmissTblItem(int site, int state)
 	if (pEmissTbl[site][state] <1e-12)
 		pEmissTbl[site][state] = 1e-12;
 
-	//if (pEmissTbl[site][state] <= 0)
-	//{
-	//	cout << "wired" << endl;
-	//	cout << site << " " << state << endl;
-	//	cout << m << " " << y << " " << phi[state] << endl;
-	//	cout << endl;
-	//}
 }
 
 void HMModel::setFileName(char * sn, char * in)
@@ -2166,16 +1449,9 @@ void HMModel::findBestPath(bool viterbi)
 	}
 	else
 	{
-//		double mapThreshold = 0.3;
-//		double normalThreshold = 0.1;
-//		cout << "mapThreshold =  " << mapThreshold << "normalThreshold = " << normalThreshold << endl;
+
 		for(int i = 0; i < nLength; ++i)
 		{
-//			if (exp(inferData.data[i].logMap) < mapThreshold)
-//			{
-//				inferenceResults[i] = normalStates;
-//				continue;
-//			}
 			double delP = 0;
 			double norP = exp(pGamma[i][normalStates]);
 			double dupP = 0;
@@ -2183,10 +1459,7 @@ void HMModel::findBestPath(bool viterbi)
 			double max = -1;
 			for(int j = 0; j < nSTATES; ++j)
 			{
-//				if (j < normalStates)
-//					delP += exp(pGamma[i][j]);
-//				else if (j > normalStates)
-//					dupP += exp(pGamma[i][j]);
+
 				if (exp(pGamma[i][j]) > max)
 				{
 					index = j;
@@ -2194,31 +1467,6 @@ void HMModel::findBestPath(bool viterbi)
 				}
 			}
 			inferenceResults[i] = index;
-//			inferenceResults[i] = normalStates;
-			//cout << i << " " << index << " " << max << " " << exp(pGamma[i][normalStates]) << " " << exp(pGamma[i][index]) << endl;
-/*			if (index != normalStates)
-			{
-				if (exp(pGamma[i][normalStates]) < normalThreshold)
-					inferenceResults[i] = index;
-				else
-				{
-					if (index > normalStates+1 || index < normalStates-1)
-						inferenceResults[i] = index;
-					else
-					{
-						if (exp(pGamma[i][index]) > 2*exp(pGamma[i][normalStates]))
-							inferenceResults[i] = index;
-					}
-				}
-//				else
-//				{
-//					if (exp(pGamma[i][index]) > )
-//				}
-			}*/
-//			if (delP > threshold || dupP > threshold)
-//			    inferenceResults[i] = index;
-//			else
-//				inferenceResults[i] = normalStates;
 		}
 	}
 
