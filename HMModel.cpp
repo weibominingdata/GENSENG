@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 // math tools, NB regression
 #include "MathTools.h"
@@ -979,6 +980,18 @@ void HMModel::writeResult(void)
 		int index = inferenceResults[i];
 		cn[i] = index;
 	}
+	vector<string> allelic_cons(nLength,"");
+	vector<double> allelic_scores(nLength,0);
+	if (ALLELESPECIFICDATA){
+		string a;
+		double s;
+		for(int i = 0; i< nLength; ++i){
+			if (calculateAllelicConfiguration(i,cn[i],a,s)){
+				allelic_cons[i]=a;
+				allelic_scores[i]=s;
+			}
+		}
+	}
 
 	string fileName("chr");
 	fileName += chrSymbol;
@@ -993,8 +1006,13 @@ void HMModel::writeResult(void)
 	ofstream out1(segName.c_str());
 	//out << "name\t" << "state\t" << "stateP\t" << "CN\t" << endl;
 	//out1 << "chr\t" << "start\t" << "end\t" << "state\t" << "cn\t" << "sample\t" << "snp1\t" << "snp2\t" << "score\t" << "n\t" << endl;
-	out << "chr\t" << "str\t" << "end\t" <<"mprop\t" << "gprop\t" << "wincount\t" << "state\t" << "stateP\t" << "CN\t" << endl;
-	out1 << "chr\t" << "start\t" << "end\t" << "state\t" << "cn\t" << "sample\t" << "score\t" << "n\t" << "mscore\t" << "ave.mprop\t" << "ave.gprop\t" << "winct.ratio\t" << "exp.winct\t" << endl;
+	if (ALLELESPECIFICDATA){
+		out << "chr\t" << "str\t" << "end\t" <<"mprop\t" << "gprop\t" << "wincount\t" << "state\t" << "stateP\t" << "CN\t" << "Allelic.Configuration\t" << "Allelic.Score" << endl;
+		out1 << "chr\t" << "start\t" << "end\t" << "state\t" << "cn\t" << "sample\t" << "score\t" << "n\t" << "mscore\t" << "ave.mprop\t" << "ave.gprop\t" << "winct.ratio\t" << "exp.winct\t" << "Allelic.Configuration\t" << "Allelic.TotalScore\t" << "Allelic.AvgScore"<< endl;
+	}else{
+		out << "chr\t" << "str\t" << "end\t" <<"mprop\t" << "gprop\t" << "wincount\t" << "state\t" << "stateP\t" << "CN" << endl;
+		out1 << "chr\t" << "start\t" << "end\t" << "state\t" << "cn\t" << "sample\t" << "score\t" << "n\t" << "mscore\t" << "ave.mprop\t" << "ave.gprop\t" << "winct.ratio\t" << "exp.winct" << endl;
+	}
 	
 	int start = 0;
 	int end = 0;
@@ -1028,9 +1046,23 @@ void HMModel::writeResult(void)
 					double mscore = score/(end-start+1);
 					double amprop,agprop,rd,expect;
 					getSegInfo(start,end,amprop,agprop,rd,expect);
-					out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
-						<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
-						<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
+					if (ALLELESPECIFICDATA){
+						string a="";
+						double s=0;
+						if (!getAllelicConfiguration(start, end, cn[start], a, s, allelic_cons, allelic_scores)){
+							a="";
+							s=0;
+						}
+						out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+								<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+								<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << "\t"
+								<< a << "\t" << s << "\t" << s/(end-start+1) <<  endl;
+
+					}else{
+						out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+								<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+								<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
+					}
 					// a start of a new CNV
 					start = i;
 					cnvtype = cn[i];
@@ -1049,16 +1081,36 @@ void HMModel::writeResult(void)
 				double mscore = score/(end-start+1);
 				double amprop,agprop,rd,expect;
 				getSegInfo(start,end,amprop,agprop,rd,expect);
-				out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
-					<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
-					<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd<< "\t" << expect << endl;
+				if (ALLELESPECIFICDATA){
+					string a="";
+					double s=0;
+					if (!getAllelicConfiguration(start, end, cn[start], a, s, allelic_cons, allelic_scores)){
+						a="";
+						s=0;
+					}
+					out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+							<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+							<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << "\t"
+							<< a << "\t" << s << "\t" << s/(end-start+1) << endl;
+
+				}else{
+					out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+							<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+							<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
+				}
 
 			}
 			cnv = false;
 		}
+		if (ALLELESPECIFICDATA){
+			out << chrSymbol << "\t" << inferData.data[i].startPos << "\t" << inferData.data[i].endPos <<"\t" << inferData.data[i].mprop <<"\t" << inferData.data[i].gprop
+					<<"\t" << inferData.data[i].count <<"\t" <<  inferenceResults[i] << "\t" << exp(pGamma[i][inferenceResults[i]]) <<"\t"
+				<< cn[i] << "\t" << allelic_cons[i] << "\t" << allelic_scores[i] << endl;
+		}else{
 		out << chrSymbol << "\t" << inferData.data[i].startPos << "\t" << inferData.data[i].endPos <<"\t" << inferData.data[i].mprop <<"\t" << inferData.data[i].gprop
 				<<"\t" << inferData.data[i].count <<"\t" <<  inferenceResults[i] << "\t" << exp(pGamma[i][inferenceResults[i]]) <<"\t"
 			<< cn[i] << endl;
+		}
 	}
 
 	if (cnv)
@@ -1071,9 +1123,23 @@ void HMModel::writeResult(void)
 		double mscore = score/(end-start+1);
 		double amprop,agprop,rd,expect;
 		getSegInfo(start,end,amprop,agprop,rd,expect);
-		out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
-			<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
-			<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
+		if (ALLELESPECIFICDATA){
+			string a="";
+			double s=0;
+			if (!getAllelicConfiguration(start, end, cn[start], a, s, allelic_cons, allelic_scores)){
+				a="";
+				s=0;
+			}
+			out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+					<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+					<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << "\t"
+					<< a << "\t" << s << "\t" << s/(end-start+1) << endl;
+
+		}else{
+			out1 << chrSymbol << "\t" << inferData.data[start].startPos << "\t" << inferData.data[end].endPos << "\t"
+					<< inferenceResults[start] << "\t" << cn[start] << "\t" << "test\t"
+					<< score << "\t" << end-start+1 << "\t" << mscore << "\t" << amprop << "\t" << agprop << "\t" << rd << "\t" << expect << endl;
+		}
 
 	}
 
@@ -1623,6 +1689,195 @@ void HMModel::writeKeyValue(int index)
 	for(int j = 0; j < nSTATES; ++j)
 		fout << pPi[j] << " ";
 	fout.close();
+}
+
+//find the most likely allelic configuration of a window, according to its most likely state
+
+bool HMModel::calculateAllelicConfiguration(int pos, int state, std::string &allelic_con, double &score){
+	allelic_con="";
+	score=0;
+	vector<int> acntypes; // number of allelic configurations of each state
+	map<int, vector<string> > c; // allelic configurations of each state
+	map<int, vector<double> > v; // proporation of selecting one allele of each state
+	getAllelicConfigTable(acntypes, c, v);
+
+
+	if (inferData.data[pos].a1count>0 || inferData.data[pos].a2count>0){
+		double acount=inferData.data[pos].a1count+inferData.data[pos].a2count;
+		vector<double> posteriori(7,0.0);
+		switch(state){
+		case 0:
+			allelic_con=c[0][0];
+			score=exp(pGamma[pos][0]);
+			break;
+		case 2:
+			allelic_con=c[2][0];
+			score=exp(pGamma[pos][2]);
+			break;
+		default:
+			int n=acntypes[state];
+			vector<double> val(n,0);
+			for(int i=0; i<n; ++i){
+				val[i]=MathTools::betaBinomial(acount,inferData.data[pos].a1count,v[state][i],0.1);
+			}
+			int mcon=-1;
+			double maxScore=0;
+			double totalScore=0;
+			for(int i=0; i<n; ++i){
+				if (mcon==-1){
+					mcon=i;
+					maxScore=val[i];
+				}
+				else{
+					if (val[i]>maxScore){
+						mcon=i;
+						maxScore=val[i];
+					}
+				}
+				totalScore+=val[i];
+			}
+			allelic_con=c[state][mcon];
+			score=exp(pGamma[pos][state])*maxScore/totalScore;
+			break;
+		}
+		return true;
+	}else{
+		return false;
+	}
+}
+
+
+// find the majority allelic configuration of the CNV bounded by l_bound, r_bound
+// calculate the aveconfidence score of the majority allelic configuration
+// return whether the CNV has allelic configuration,
+// and if yes, return its allelic configuration, and the total confidence score
+
+bool HMModel::getAllelicConfiguration(int l_bound, int r_bound, int state, string &allelic_con, double &score, vector<string> &allelic_cons, vector<double> &scores){
+	if (r_bound<l_bound){
+		return false;
+	}
+	int n=r_bound-l_bound+1;
+	score=0;
+	allelic_con="";
+	// to find, first needs to count, 1) how many with allelic configurations, 2) the majority allelic configurations
+	vector<int> acntypes; // number of allelic configurations of each state
+	map<int, vector<string> > c; // allelic configurations of each state
+	map<int, vector<double> > v; // proporation of selecting one allele of each state
+	getAllelicConfigTable(acntypes, c, v);
+	int types=acntypes[state];
+	vector<int> counts(types+1,0); // the last element will be the number of no allelic specific windows
+	for(int i=0; i<n; ++i){
+		if (allelic_cons[l_bound+i]==""){
+			counts[types]++;
+		}else{
+			int idx=-1;
+			for(int j=0; j<types; ++j){
+				if (allelic_cons[l_bound+i]==c[state][j]){
+					idx=j;
+					break;
+				}
+			}
+			if (idx==-1){
+				cout << "error in getAllelicConfiguration, position: " <<l_bound+i << "state: " << state << "allelic configuration: " << allelic_cons[l_bound+i] << endl;
+				return false;
+			}else{
+				counts[idx]++;
+			}
+		}
+	}
+	// which one is the majority?
+	int idx=-1;
+	int maxCount=-1;
+	for(int i=0; i<types+1;++i){
+		if (idx==-1){
+			idx=i;
+			maxCount=counts[idx];
+		}else{
+			if (counts[i]>maxCount){
+				idx=i;
+				maxCount=counts[i];
+			}
+		}
+	}
+	if (idx==types){
+		return false;
+	}else{
+		allelic_con=c[state][idx];
+		for(int i=0; i<n; ++i){
+			if (allelic_cons[l_bound+i]==allelic_con){
+				score+=scores[l_bound+i];
+			}
+		}
+		return true;
+	}
+
+}
+
+void HMModel::getAllelicConfigTable(vector<int> &acntypes, map<int, vector<string> > &c, map<int, vector<double> > &v){
+	acntypes.clear();
+	acntypes.push_back(1); // state 0
+	acntypes.push_back(2); // state 1
+	acntypes.push_back(1); // state 2
+	acntypes.push_back(2); // state 3
+	acntypes.push_back(3); // state 4
+	acntypes.push_back(4); // state 5
+	acntypes.push_back(5); // state 6
+	c.clear(); // allelic configurations of each state
+	vector<string> t;
+	t.push_back("-");
+	c[0]=t;
+	t.clear();
+	t.push_back("AB");
+	c[2]=t;
+	for(int i=1; i<=6; ++i){
+		if (i==2) continue;
+		t.clear();
+		int n=acntypes[i];
+		for(int j=0; j<n; ++j){
+			string config="";
+			int nA=(j+1)>i?0:(j+1);
+			int nB=i-nA;
+			string Apart(nA,'A');
+			string Bpart(nB,'B');
+			config=Apart+Bpart;
+			t.push_back(config);
+		}
+		c[i]=t;
+	}
+	v.clear(); // proporation of selecting one allele of each state
+	vector<double> tt;
+	tt.push_back(0.99);
+	v[0]=tt; // actually, for state 0, we use uniform distribution rather than beta binormial distribution. Here just for the sake of coding
+	tt.clear();
+	tt.push_back(0.01);
+	tt.push_back(0.99);
+	v[1]=tt;
+	tt.clear();
+	tt.push_back(0.5);
+	v[2]=tt;
+	tt.clear();
+	tt.push_back(0.33);
+	tt.push_back(0.67);
+	v[3]=tt;
+	tt.clear();
+	tt.push_back(0.25);
+	tt.push_back(0.5);
+	tt.push_back(0.75);
+	v[4]=tt;
+	tt.clear();
+	tt.push_back(0.2);
+	tt.push_back(0.4);
+	tt.push_back(0.6);
+	tt.push_back(0.8);
+	v[5]=tt;
+	tt.clear();
+	tt.push_back(0.17);
+	tt.push_back(0.33);
+	tt.push_back(0.5);
+	tt.push_back(0.67);
+	tt.push_back(0.83);
+	v[6]=tt;
+	tt.clear();
 }
 
 ////////////////////////////////////// codes that are not active ///////////////////

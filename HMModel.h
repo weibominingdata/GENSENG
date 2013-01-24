@@ -169,6 +169,9 @@ private:
 	void merge_CNV();
 	int mostFrequentState(int l, int r);
 	void getSegInfo(int l, int r, double &avemprop, double &avegprop, double &rd, double &expect);
+	bool calculateAllelicConfiguration(int pos, int state, std::string &allelic_con, double &score);
+	bool getAllelicConfiguration(int l_bound, int r_bound, int state, std::string &allelic_con, double &score, std::vector<std::string> &allelic_cons, std::vector<double> &scores);
+	void getAllelicConfigTable(std::vector<int> &acntypes, std::map<int, std::vector<std::string> > &c, std::map<int, std::vector<double> > &v);
 
 
 private:

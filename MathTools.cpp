@@ -3197,11 +3197,16 @@ double MathTools::lchoose(double n, double k){
 }
 
 double MathTools::betaBinomial(double n, double k, double pi, double theta){
+	// in log scale
 	double sumL=lchoose(n,k);
-	for(int i=0; i<int(k); i++) sumL+=log(pi+i*theta);
-	for(int i=0; i<int(n-k); i++) sumL+=log(1.0-pi+i*theta);
-	for(int i=0; i<int(k);i++) sumL-=log(1.0+i*theta);
-	return sumL;
+	if (k>0){
+		for(int i=0; i<int(k); i++) sumL+=log(pi+i*theta);
+	}
+	if (n>k){
+		for(int i=0; i<int(n-k); i++) sumL+=log(1.0-pi+i*theta);
+	}
+	for(int i=0; i<int(n);i++) sumL-=log(1.0+i*theta);
+	return exp(sumL);
 }
 
 static void gammalims(double *xmin, double *xmax){
