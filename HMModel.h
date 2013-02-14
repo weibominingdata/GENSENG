@@ -143,7 +143,7 @@ public:
 
 public:
 	void writeResult(void);
-	void inferAndEstimation(int rounds,bool writeResults=true);
+	void inferAndEstimation(int rounds,bool wkv=true);
 
 	bool USINGMAPPABILITY;
 	bool USINGAUTOREGRESSION;

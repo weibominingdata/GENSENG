@@ -767,16 +767,16 @@ HMModel::HMModel(const HMModel & m)
 
 
 
-void HMModel::inferAndEstimation(int rounds, bool writeKeyValue)
+void HMModel::inferAndEstimation(int rounds, bool wkv)
 {
-	if (writeKeyValue){
+	if (wkv){
 		writeKeyValue(0);
 	}
 	for(int i = 0; i < rounds; ++i)
 	{
 		doOneRoundInference();
 		reEstimation(REESTIMATETRANSITION, REESTIMATEINIT);
-		if (writeKeyValue){
+		if (wkv){
 			writeKeyValue(i+1);
 		}
 	}
