@@ -3198,7 +3198,7 @@ double MathTools::lchoose(double n, double k){
 
 double MathTools::betaBinomial(double n, double k, double pi, double theta){
 	// in log scale
-	double sumL=lchoose(n,k);
+	double sumL=lchoose(n,int(k));
 	if (k>0){
 		for(int i=0; i<int(k); i++) sumL+=log(pi+i*theta);
 	}

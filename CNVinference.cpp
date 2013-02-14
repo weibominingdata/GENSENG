@@ -10,10 +10,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-//	double n=200.5, k=100;
-//	cout << "lchoose(" << n << "," << k <<")=" << MathTools::lchoose(n,k) << endl;
-
-
 	HMModel model;
 
 	cout << "inference rounds: " << atoi(argv[2]) << " mixture componenet for other states: " << atof(argv[3]) << "mixture componenet for state 2: " << atof(argv[4]) << " ";

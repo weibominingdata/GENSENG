@@ -143,7 +143,7 @@ public:
 
 public:
 	void writeResult(void);
-	void inferAndEstimation(int rounds);
+	void inferAndEstimation(int rounds,bool writeResults=true);
 
 	bool USINGMAPPABILITY;
 	bool USINGAUTOREGRESSION;
@@ -155,7 +155,7 @@ public:
 	bool GIVENSTATES;
 	bool ALLELESPECIFICDATA;
 
-private:
+public:
 	void computAlpha(void);
 	void computBeta(void);
 	void computLikelihood(void);
@@ -170,11 +170,11 @@ private:
 	int mostFrequentState(int l, int r);
 	void getSegInfo(int l, int r, double &avemprop, double &avegprop, double &rd, double &expect);
 	bool calculateAllelicConfiguration(int pos, int state, std::string &allelic_con, double &score);
-	bool getAllelicConfiguration(int l_bound, int r_bound, int state, std::string &allelic_con, double &score, std::vector<std::string> &allelic_cons, std::vector<double> &scores);
+	bool getAllelicConfiguration(int l_bound, int r_bound, int state, std::string &allelic_con, double &score, double &a1count, double &a2count, std::vector<std::string> &allelic_cons, std::vector<double> &scores);
 	void getAllelicConfigTable(std::vector<int> &acntypes, std::map<int, std::vector<std::string> > &c, std::map<int, std::vector<double> > &v);
 
 
-private:
+public:
 	int nSTATES;
 	int nLength;
 	int normalStates; // index of normal states
@@ -226,10 +226,10 @@ public:
 	double ***pKexi;
 	double **pGa;
 
-private:
+public:
 	std::string chrSymbol;
 	void setFileName(char * sn, char * in);
-private:
+public:
 	double *pircn;
 	double *murcn;
 	double *sdrcn;
@@ -240,7 +240,7 @@ private:
 	double **mub;
 	double **sdb;
 
-private:
+public:
 	// for debug
 	void writeKeyValue(int index);
 	// for debug
