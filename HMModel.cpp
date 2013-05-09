@@ -1295,15 +1295,6 @@ void HMModel::fillEmissTblItem(int site, int state)
 	double w = 1; // weight is not useful when calculating the emission probability
 	double e = exp(MathTools::loglik_NB(1, phi[state], &m, &y, &w));
 	//pEmissTbl[site][state] = e;
-	if (state==2)
-	{
-		pEmissTbl[site][state] = mixtureProportionNormal/largestReadCount + (1-mixtureProportionNormal)*e;
-	}
-	else
-	{
-		pEmissTbl[site][state] = mixtureProportion/largestReadCount + (1-mixtureProportion)*e;
-	}
-
 
 	double alleleeffect=1.0;
 	double alleleCount=inferData.data[site].a1count + inferData.data[site].a2count;
@@ -1349,7 +1340,19 @@ void HMModel::fillEmissTblItem(int site, int state)
 		}
 	}
 
-	pEmissTbl[site][state] *= alleleeffect;
+	e*=alleleeffect;
+
+	if (state==2)
+	{
+		pEmissTbl[site][state] = mixtureProportionNormal/largestReadCount + (1-mixtureProportionNormal)*e;
+	}
+	else
+	{
+		pEmissTbl[site][state] = mixtureProportion/largestReadCount + (1-mixtureProportion)*e;
+	}
+
+
+//	pEmissTbl[site][state] *= alleleeffect;
 
 //	if (site>=505400 && site<=505410){
 //		cout << "site: " << site << " state: "<< state << " starting pos " << inferData.data[site].startPos << " phi: " << phi[state] << " mu: " << m << " count:  " << y << "emission: " << log(pEmissTbl[site][state]) << "allele effect is :" << alleleeffect << endl;
@@ -1574,133 +1577,133 @@ void HMModel::writeKeyValueTable(char *filename, double ** data)
 
 void HMModel::writeKeyValue(int index)
 {
-	// 
-	stringstream s;
-	s << index;
-	string postfix = s.str()+".log";
-	// alpha,beta,gamma,transition,emission
-	string filename("alpha");
-	filename += postfix;
-	filename = path+filename;
-//	writeKeyValueTable(filename.c_str(), pAlpha);
-	ofstream fout(filename.c_str());
-	fout.precision(8);
-	fout << "chr  " << "str  " << "end  ";
-    for(int i = 0; i < nSTATES; ++i)
-		fout << "column  ";
-	fout << endl;
-	for(int i = 0; i < nLength; ++i)
-	{
-		fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
-		for(int j = 0; j < nSTATES; ++j)
-			fout << pAlpha[i][j] << " ";
+		//
+		stringstream s;
+		s << index;
+		string postfix = s.str()+".log";
+		// alpha,beta,gamma,transition,emission
+		string filename("alpha");
+		filename += postfix;
+		filename = path+filename;
+	//	writeKeyValueTable(filename.c_str(), pAlpha);
+		ofstream fout(filename.c_str());
+		fout.precision(8);
+		fout << "chr  " << "str  " << "end  ";
+		for(int i = 0; i < nSTATES; ++i)
+			fout << "column  ";
 		fout << endl;
-	}
-	fout.close();
-
-	filename = "beta";
-	filename += postfix;
-	filename = path+filename;
-//	writeKeyValueTable(filename.c_str(), pBeta);
-	fout.open(filename.c_str());
-	fout << "chr  " << "str  " << "end  ";
-    for(int i = 0; i < nSTATES; ++i)
-		fout << "column  ";
-	fout << endl;
-	for(int i = 0; i < nLength; ++i)
-	{
-		fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
-		for(int j = 0; j < nSTATES; ++j)
-			fout << pBeta[i][j] << " ";
-		fout << endl;
-	}
-	fout.close();
-
-	filename = "gamma";
-	filename += postfix;
-	filename = path+filename;
-//	writeKeyValueTable(filename.c_str(), pGamma);
-	fout.open(filename.c_str());
-	fout << "chr  " << "str  " << "end  ";
-	for(int i = 0; i < nSTATES; ++i)
-		fout << "column  ";
-	fout << "total ";
-	fout << endl;
-	for(int i = 0; i < nLength; ++i)
-	{
-		double sum = 0;
-		fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
-		for(int j = 0; j < nSTATES; ++j)
+		for(int i = 0; i < nLength; ++i)
 		{
-			fout << exp(pGamma[i][j]) << " ";
-			sum += exp(pGamma[i][j]);
+			fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+			for(int j = 0; j < nSTATES; ++j)
+				fout << pAlpha[i][j] << " ";
+			fout << endl;
 		}
-		fout << sum;
-		fout << endl;
-	}
-	fout.close();
+		fout.close();
 
-	filename = "transition";
-	filename += postfix;
-	filename = path+filename;
-	fout.open(filename.c_str());
-	for(int i = 0; i < nSTATES; ++i)
-	{
+		filename = "beta";
+		filename += postfix;
+		filename = path+filename;
+	//	writeKeyValueTable(filename.c_str(), pBeta);
+		fout.open(filename.c_str());
+		fout << "chr  " << "str  " << "end  ";
+		for(int i = 0; i < nSTATES; ++i)
+			fout << "column  ";
+		fout << endl;
+		for(int i = 0; i < nLength; ++i)
+		{
+			fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+			for(int j = 0; j < nSTATES; ++j)
+				fout << pBeta[i][j] << " ";
+			fout << endl;
+		}
+		fout.close();
+
+		filename = "gamma";
+		filename += postfix;
+		filename = path+filename;
+	//	writeKeyValueTable(filename.c_str(), pGamma);
+		fout.open(filename.c_str());
+		fout << "chr  " << "str  " << "end  ";
+		for(int i = 0; i < nSTATES; ++i)
+			fout << "column  ";
+		fout << "total ";
+		fout << endl;
+		for(int i = 0; i < nLength; ++i)
+		{
+			double sum = 0;
+			fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+			for(int j = 0; j < nSTATES; ++j)
+			{
+				fout << exp(pGamma[i][j]) << " ";
+				sum += exp(pGamma[i][j]);
+			}
+			fout << sum;
+			fout << endl;
+		}
+		fout.close();
+
+		filename = "transition";
+		filename += postfix;
+		filename = path+filename;
+		fout.open(filename.c_str());
+		for(int i = 0; i < nSTATES; ++i)
+		{
+			for(int j = 0; j < nSTATES; ++j)
+				fout << pTranTbl[i][j] << " ";
+			fout << endl;
+		}
+		fout.close();
+
+		filename = "emission";
+		filename += postfix;
+		filename = path+filename;
+		fout.open(filename.c_str());
+		fout << "chr  " << "str  " << "end  ";
+		for(int i = 0; i < nSTATES; ++i)
+			fout << "column  ";
+		fout << endl;
+		for(int i = 0; i < nLength; ++i)
+		{
+			fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+			for(int j = 0; j < nSTATES; ++j)
+				fout << log(pEmissTbl[i][j]) << " ";
+			fout << endl;
+		}
+		fout.close();
+
+		filename = "mu";
+		filename += postfix;
+		filename = path+filename;
+		fout.open(filename.c_str());
+		fout << "chr  " << "str  " << "end  ";
+		for(int i = 0; i < nSTATES; ++i)
+			fout << "column  ";
+		fout << endl;
+		for(int i = 0; i < nLength; ++i)
+		{
+			fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+			for(int j = 0; j < nSTATES; ++j)
+				fout << mu[i][j] << " ";
+			fout << endl;
+		}
+		fout.close();
+
+		filename = "phi";
+		filename += postfix;
+		filename = path+filename;
+		fout.open(filename.c_str());
 		for(int j = 0; j < nSTATES; ++j)
-			fout << pTranTbl[i][j] << " ";
-		fout << endl;
-	}
-	fout.close();
+			fout << phi[j] << " ";
+		fout.close();
 
-	filename = "emission";
-	filename += postfix;
-	filename = path+filename;
-	fout.open(filename.c_str());
-	fout << "chr  " << "str  " << "end  ";
-	for(int i = 0; i < nSTATES; ++i)
-		fout << "column  ";
-	fout << endl;
-	for(int i = 0; i < nLength; ++i)
-	{
-		fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
+		filename = "init";
+		filename += postfix;
+		filename = path+filename;
+		fout.open(filename.c_str());
 		for(int j = 0; j < nSTATES; ++j)
-			fout << log(pEmissTbl[i][j]) << " ";
-		fout << endl;
-	}
-	fout.close();
-
-	filename = "mu";
-	filename += postfix;
-	filename = path+filename;
-	fout.open(filename.c_str());
-	fout << "chr  " << "str  " << "end  ";
-	for(int i = 0; i < nSTATES; ++i)
-		fout << "column  ";
-	fout << endl;
-	for(int i = 0; i < nLength; ++i)
-	{
-		fout << inferData.chr << " " << inferData.data[i].startPos << " " << inferData.data[i].endPos << " ";
-		for(int j = 0; j < nSTATES; ++j)
-			fout << mu[i][j] << " ";
-		fout << endl;
-	}
-	fout.close();
-
-	filename = "phi";
-	filename += postfix;
-	filename = path+filename;
-	fout.open(filename.c_str());
-	for(int j = 0; j < nSTATES; ++j)
-		fout << phi[j] << " ";
-	fout.close();
-
-	filename = "init";
-	filename += postfix;
-	filename = path+filename;
-	fout.open(filename.c_str());
-	for(int j = 0; j < nSTATES; ++j)
-		fout << pPi[j] << " ";
-	fout.close();
+			fout << pPi[j] << " ";
+		fout.close();
 }
 
 //find the most likely allelic configuration of a window, according to its most likely state
